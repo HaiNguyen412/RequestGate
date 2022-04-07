@@ -1,0 +1,95 @@
+stages:
+  - Install
+  - Build
+  - Deploy
+
+.install_template: &install_definition
+  stage: Install
+  cache:
+    paths:
+      - node_modules/
+  script:
+    - npm install --legacy-peer-deps
+
+.build_template: &build_definition
+  stage: Build
+  cache:
+    paths:
+      - node_modules/
+  script:
+    - REACT_APP_PUBLIC_URL=$REACT_APP_PUBLIC_URL REACT_APP_ENV=$REACT_APP_ENV npm run build
+    - echo "$HTACCESS" > build/.htaccess
+  artifacts:
+    paths:
+      - build
+
+# Development environment
+InstallDev:
+  <<: *install_definition
+  environment:
+    name: development
+  only:
+    - develop@lnd-training/hb-future-02/mock-project/front-end/team2
+
+BuildDev:
+  <<: *build_definition
+  environment:
+    name: development
+  variables:
+    REACT_APP_ENV: development
+  only:
+    - develop@lnd-training/hb-future-02/mock-project/front-end/team2
+
+DeployDev:
+  stage: Deploy
+  image: node:8.14.0-alpine
+  only:
+    - develop@lnd-training/hb-future-02/mock-project/front-end/team2
+  environment:
+    name: development
+  script:
+    - apk add rsync && apk add openssh
+    - eval $(ssh-agent -s) && echo "$DEPLOY_SSH_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\tControlMaster auto\n\tControlPath /tmp/ansible-%r@%h:%p\n\tControlPersist 15m\n\tPreferredAuthentications publickey
+  \n\n" > ~/.ssh/config'
+    - chmod go-wrx -R ~/.ssh
+    - echo "OK" >public/health.html && rsync -azP --exclude='.git*' --exclude=node_modules/ build/ $DEV_DEPLOY_USER@$DEV_DEPLOY_HOST:$DEV_DEPLOY_DIR/
+    - ssh $DEV_DEPLOY_USER@$DEV_DEPLOY_HOST "aws s3 sync $DEV_DEPLOY_DIR/ s3://$DEV_S3_BUCKET/"
+    - ssh $DEV_DEPLOY_USER@$DEV_DEPLOY_HOST "aws cloudfront create-invalidation --distribution-id $DEV_CLOUDFRONT_ID --paths '/*'"
+
+# Production environment
+InstallProduction:
+  <<: *install_definition
+  environment:
+    name: production
+  only:
+    - master@lnd-training/hb-future-02/mock-project/front-end/team2
+
+BuildProduction:
+  <<: *build_definition
+  environment:
+    name: production
+  variables:
+    REACT_APP_ENV: production
+  only:
+    - master@lnd-training/hb-future-02/mock-project/front-end/team2
+
+DeployProduction:
+  stage: Deploy
+  image: node:8.14.0-alpine
+  only:
+    - master@lnd-training/hb-future-02/mock-project/front-end/team2
+  environment:
+    name: production
+  script:
+    - apk add rsync && apk add openssh
+    - eval $(ssh-agent -s) && echo "$DEPLOY_SSH_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\tControlMaster auto\n\tControlPath /tmp/ansible-%r@%h:%p\n\tControlPersist 15m\n\tPreferredAuthentications publickey
+  \n\n" > ~/.ssh/config'
+    - chmod go-wrx -R ~/.ssh
+    - echo "OK" >public/health.html && rsync -azP --exclude='.git*' --exclude=node_modules/ build/ $PRO_DEPLOY_USER@$PRO_DEPLOY_HOST:$PRO_DEPLOY_DIR/
+    - ssh $PRO_DEPLOY_USER@$PRO_DEPLOY_HOST "aws s3 sync $PRO_DEPLOY_DIR/ s3://$PRO_S3_BUCKET/"
+    - ssh $PRO_DEPLOY_USER@$PRO_DEPLOY_HOST "aws cloudfront create-invalidation --distribution-id $PRO_CLOUDFRONT_ID --paths '/*'"
+    

@@ -1,0 +1,19 @@
+body {
+  background-color: #f0f0f0;
+}
+.not-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 4rem 0;
+}
+img {
+  display: block;
+  margin-bottom: 1.5rem;
+  max-width: 100%;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap");
+}

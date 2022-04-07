@@ -1,0 +1,32 @@
+<?php
+
+return [
+    'create_succeed' => 'Create Succeed!',
+    'create_failed' => 'Create Failed!',
+    'update_succeed' => 'Update Succeed!',
+    'update_failed' => 'Update Failed!',
+    'delete_succeed' => 'Delete succeed!',
+    'delete_failed' => 'Delete Failed!',
+    'find_succeed' => 'Find Succeed!',
+    'find_failed' => 'ID not found!',
+    'email' => 'Address Email',
+    'email_unique' => 'A user with this email address already exists!',
+    'email_required' => 'Email is required!',
+    'name' => 'Your Name',
+    'name_required' => 'Name is required!',
+    'pw' => 'Your Password',
+    'pw_required' => 'Password is required!',
+    'nameLength' => 'Name up to 25 characters',
+    'passwordLength' => 'Password minimum 6 characters',
+    'roleId' => 'RoleID is required',
+    'roleId_in' => 'RoleID is admin, staff or manager',
+    'departmentID' => 'DepartmentID is required',
+    'endWith' => 'Email is XXX@hblab.vn',
+    'int' => 'Is an integer',
+    'exist' => 'DepartmentID exists in table Departments, at field ID',
+    'password_same' => 'Passwords are not the same',
+    'change_password_successfully' => 'You have successfully changed your password',
+    'status_in' => 'Status is  Active, Deactivate or Pending',
+    'wrong_password' => 'Incorrect current password',
+
+];
